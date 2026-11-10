@@ -1,0 +1,15 @@
+{
+  "name": "bm-coder",
+  "productName": "BM Coder",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": { "appId": "com.bm.coder", "productName": "BM Coder", "win": { "target": "portable" } }
+}

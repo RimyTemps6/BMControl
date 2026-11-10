@@ -1,0 +1,6 @@
+BM Coder - como rodar no Windows
+1. Instale o Node.js (nodejs.org)
+2. Abra o terminal na pasta bm-coder
+3. npm install
+4. npm start          (abre o app)
+5. npm run build      (gera o .exe portatil em /dist)

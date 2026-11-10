@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>BM Coder</title>
+<style>
+:root{--candy:#9FD3F5;--candy-d:#5DAEE8;--candy-l:#E6F4FD;--bg:#FFFFFF;--panel:#F4FAFF;--ink:#17324A;--mute:#6B8499;--stop:#FF8E9A;--ok:#5CCB9A}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Poppins,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);display:flex;font-size:15px}
+aside{width:230px;background:linear-gradient(160deg,#fff 0%,var(--candy-l) 45%,var(--candy) 130%);padding:14px;display:flex;flex-direction:column;border-right:1px solid #d7ebf8}
+nav button{all:unset;display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px}
+nav button.on{background:rgba(93,174,232,.2)}
+nav button:focus-visible,.btn:focus-visible{outline:2px solid var(--candy-d);outline-offset:2px}
+.ico{width:34px;height:34px;border-radius:9px;background:var(--candy-d);display:grid;place-items:center;color:#fff;font-size:15px}
+.ver{margin-top:auto;font-size:12px;line-height:1.5;color:var(--mute)}.ver b{color:var(--ink);font-weight:500}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;gap:12px}
+.status{font-weight:500}.status.off{color:#E5566A}.status.on{color:var(--ok)}
+.pill{display:flex;align-items:center;gap:6px;color:var(--mute)}
+.bat{width:26px;height:12px;border:2px solid var(--ink);border-radius:5px}
+.pad{padding:2px 8px;border-radius:6px;background:var(--candy-l);font-size:12px;font-weight:600}.pad.live{background:var(--candy);}
+section{display:none;padding:0 18px 18px;flex:1;min-height:0;flex-direction:column}
+section.on{display:flex}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+select{font:inherit;border:1px solid var(--candy);background:#fff;color:var(--ink);padding:7px 10px;border-radius:10px}
+.btn{font:inherit;font-weight:500;border:0;border-radius:10px;padding:8px 18px;cursor:pointer;color:#fff;background:var(--candy-d)}
+.btn:disabled{background:var(--candy);opacity:.55;cursor:default}
+.btn.play{background:var(--ok)}.btn.stop{background:var(--stop)}
+hr{border:0;border-top:1px solid #dcecf7;margin:6px 0 14px}
+.timerbox{display:flex;gap:28px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+#timer{font-size:64px;font-weight:600;letter-spacing:-1px;min-width:150px;text-align:center}
+.sw{display:flex;flex-direction:column;gap:8px}
+.sw label{display:flex;align-items:center;gap:10px;cursor:pointer}
+.sw input{appearance:none;width:42px;height:22px;border-radius:11px;background:#d8e8f4;position:relative;cursor:pointer;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transition:left .15s}
+.sw input:checked{background:var(--candy-d)}.sw input:checked::after{left:22px}
+h2{margin:0 0 10px;font-size:22px;font-weight:600}
+#tele{flex:1;min-height:120px;overflow:auto;background:var(--panel);border:1px solid #dcecf7;border-radius:14px;padding:12px;font:13px/1.6 Consolas,monospace;white-space:pre-wrap}
+.empty{color:var(--mute)}
+</style>
+</head>
+<body>
+<aside>
+  <nav>
+    <button class="on" data-tab="ctl"><span class="ico">▶</span>Controle do robô</button>
+    <button data-tab="cfg"><span class="ico">⚙</span>Configuração</button>
+  </nav>
+  <div class="ver">BM Coder v0.1<br><b>Controle e código do robô FTC</b></div>
+</aside>
+<main>
+  <header>
+    <span class="status off" id="conn">Desconectado</span>
+    <div class="pill"><span class="bat"></span><span id="volt">0.00V</span>
+      <span class="pad" id="k1">K1</span><span class="pad" id="k2">K2</span>
+      <input id="ip" value="192.168.43.1" size="13" style="font:inherit;border:1px solid var(--candy);border-radius:8px;padding:4px 8px" title="IP do Robot Controller"><label style="display:flex;gap:4px;font-size:12px"><input type="checkbox" id="demo">Demo</label><button class="btn" id="link" style="padding:5px 12px">Conectar</button></div>
+  </header>
+
+  <section id="ctl" class="on">
+    <div class="row">
+      <select id="auto"><option value="">Autônomo</option></select>
+      <select id="tele-sel"><option value="">TeleOp</option></select>
+      <span id="opname" class="empty">Nenhum OpMode selecionado</span>
+    </div>
+    <div class="row">
+      <button class="btn" id="init" disabled>Init</button>
+      <button class="btn play" id="play" disabled>Play</button>
+      <button class="btn stop" id="stop" disabled>Stop</button>
+    </div>
+    <hr>
+    <div class="timerbox">
+      <div id="timer">0:00</div>
+      <div class="sw">
+        <label><input type="checkbox" id="tAuto">Usar cronômetro no autônomo (0:30)</label>
+        <label><input type="checkbox" id="tTele">Usar cronômetro no TeleOp (2:00)</label>
+        <label><input type="checkbox" id="chain">Iniciar TeleOp após o autônomo</label>
+      </div>
+    </div>
+    <hr>
+    <h2>Telemetria</h2>
+    <div id="tele"><span class="empty">Conecte ao robô para ver os dados.</span></div>
+  </section>
+
+  <section id="cfg">
+    <div class="row">
+      <button class="btn">Novo</button><button class="btn">Importar</button>
+      <span>Configuração ativa: Nenhuma</span>
+    </div>
+    <p class="empty">Nenhuma configuração encontrada.</p>
+  </section>
+</main>
+
+<script>
+const { Robocol, RealTransport } = require('./robocol.js');
+const $ = id => document.getElementById(id);
+let rc = null;
+let state = 'IDLE', mode = null, name = '', timerId = null, connected = false;
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button,section').forEach(e => e.classList.remove('on'));
+  b.classList.add('on'); $(b.dataset.tab).classList.add('on');
+});
+
+function log(t){ const el=$('tele'); if(el.querySelector('.empty')) el.innerHTML='';
+  el.textContent += t+'\n'; el.scrollTop = el.scrollHeight; }
+function ui(){
+  const sel = !!name;
+  $('init').disabled = !(connected && sel && (state==='IDLE'||state==='STOPPED'));
+  $('play').disabled = !(connected && state==='INIT');
+  $('stop').disabled = !(connected && (state==='INIT'||state==='RUNNING'));
+  $('opname').textContent = sel ? name : 'Nenhum OpMode selecionado';
+  $('opname').className = sel ? '' : 'empty';
+  $('conn').textContent = connected ? 'Conectado' : 'Desconectado';
+  $('conn').className = 'status ' + (connected ? 'on' : 'off');
+  $('link').textContent = connected ? 'Desconectar' : 'Conectar';
+  $('volt').textContent = connected ? '12.40V' : '0.00V';
+}
+function fmt(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+function runTimer(sec){ clearInterval(timerId); let t=sec; $('timer').textContent=fmt(t);
+  timerId=setInterval(()=>{ t--; $('timer').textContent=fmt(Math.max(t,0)); if(t<=0){ clearInterval(timerId); rc && rc.stop(); } },1000); }
+
+function wire(r){
+r.on('connected', () => { connected = true; fillOps(r.opModes()); log('Conectado ao Robot Controller'); ui(); });
+r.on('oplist', fillOps);
+r.on('disconnected', () => { connected = false; state='IDLE'; clearInterval(timerId); ui(); });
+r.on('error', e => log('Erro: ' + e.message));
+r.on('telemetry', log);
+r.on('state', s => { state = s==='NOT_STARTED' ? 'IDLE' : s; if (s==='STOPPED') clearInterval(timerId);
+  if (s==='STOPPED' && mode==='auto' && $('chain').checked && $('tele-sel').value) {
+    mode='tele'; name=$('tele-sel').value; r.init(name); setTimeout(()=>{ r.start(); if($('tTele').checked) runTimer(120); },300); }
+  ui(); });
+}
+function fillOps(m){
+  $('auto').innerHTML = '<option value="">Autônomo</option>' + m.auto.map(o=>`<option>${o}</option>`).join('');
+  $('tele-sel').innerHTML = '<option value="">TeleOp</option>' + m.teleop.map(o=>`<option>${o}</option>`).join('');
+}
+$('link').onclick = () => {
+  if (connected || rc) { rc && rc.disconnect(); rc = null; connected = false; ui(); return; }
+  rc = $('demo').checked ? new Robocol() : new RealTransport($('ip').value.trim());
+  wire(rc); rc.connect(); log('Conectando...');
+};
+$('auto').onchange = e => { if(e.target.value){ mode='auto'; name=e.target.value; $('tele-sel').value=''; } else if(mode==='auto'){ name=''; } ui(); };
+$('tele-sel').onchange = e => { if(e.target.value){ mode='tele'; name=e.target.value; $('auto').value=''; } else if(mode==='tele'){ name=''; } ui(); };
+$('init').onclick = () => rc && rc.init(name);
+$('play').onclick = () => { if(!rc) return; rc.start();
+  if (mode==='auto' && $('tAuto').checked) runTimer(30);
+  if (mode==='tele' && $('tTele').checked) runTimer(120); };
+$('stop').onclick = () => rc && rc.stop();
+
+// Controles Xbox/PS no PC -> K1 e K2 (mapeamento "standard" do navegador)
+function toRc(g){ const b=i=>!!(g.buttons[i]&&g.buttons[i].pressed), ax=g.axes;
+  return { a:b(0), b:b(1), x:b(2), y:b(3), left_bumper:b(4), right_bumper:b(5), back:b(8), start:b(9),
+    left_stick_button:b(10), right_stick_button:b(11), dpad_up:b(12), dpad_down:b(13), dpad_left:b(14), dpad_right:b(15), guide:b(16),
+    left_stick_x:ax[0]||0, left_stick_y:ax[1]||0, right_stick_x:ax[2]||0, right_stick_y:ax[3]||0,
+    left_trigger:g.buttons[6]?g.buttons[6].value:0, right_trigger:g.buttons[7]?g.buttons[7].value:0 }; }
+setInterval(() => {
+  const pads = [...navigator.getGamepads()].filter(Boolean);
+  ['k1','k2'].forEach((id,i) => { const g = pads[i]; $(id).classList.toggle('live', !!g);
+    if (rc && connected) { if (g) rc.gamepad(i+1, toRc(g)); else rc.gamepad(i+1, {}); } });
+}, 40);
+ui();
+</script>
+</body>
+</html>
